@@ -4,11 +4,17 @@
 <meta charset="UTF-8">
 <title>Telegram Statistikası Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- Export üçün -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
 <style>
+/* ===== BASE ===== */
 body{margin:0;padding:20px;font-family:Arial;background:#f4f6f9}
-h1{margin:0;font-size:20px}
+h1{margin:0 0 8px;font-size:20px}
 .card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .kpi{border:1px solid #eee;border-radius:10px;padding:12px}
@@ -16,187 +22,341 @@ h1{margin:0;font-size:20px}
 .kpi .v{font-size:18px;font-weight:bold;margin-top:6px}
 .experts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .expert{border:1px solid #eee;border-radius:10px;padding:12px;font-size:14px}
-table{width:100%;border-collapse:collapse}
+table{width:100%;border-collapse:collapse;min-width:480px}
 th,td{border-bottom:1px solid #eee;padding:8px;text-align:left}
 th{color:#6b7280}
-#targetPie{
-  max-width: 240px;
-  max-height: 240px;
-  margin: 0 auto;
+
+/* ===== PIE ===== */
+#targetPie{max-width:240px;max-height:240px;margin:0 auto;display:block}
+
+/* ===== TABLE SCROLL ===== */
+.table-wrap{width:100%;overflow-x:auto}
+
+/* ===== KPI STATUS ===== */
+.kpi.green{background:#ecfdf5;border-color:#10b981}
+.kpi.yellow{background:#fffbeb;border-color:#f59e0b}
+.kpi.red{background:#fef2f2;border-color:#ef4444}
+
+/* ===== COLLAPSE ===== */
+.card h3{cursor:pointer}
+.card-body{margin-top:8px}
+.card.collapsed .card-body{display:none}
+
+/* ===== TOP BADGE ===== */
+.badge{
+  display:inline-block;
+  padding:2px 8px;
+  font-size:12px;
+  border-radius:999px;
+  margin-left:8px;
+  vertical-align:middle;
+  border:1px solid #e5e7eb;
+  background:#f8fafc;
+  color:#0f172a;
+}
+.badge.top{
+  background:#fff7ed;
+  border-color:#fdba74;
 }
 
+/* ===== HEADER ACTIONS ===== */
+.topbar{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:6px;
+}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{
+  border:1px solid #e5e7eb;
+  background:#fff;
+  border-radius:10px;
+  padding:8px 10px;
+  font-size:13px;
+  cursor:pointer;
+}
+.btn:hover{background:#f8fafc}
+.muted{color:#6b7280;font-size:12px}
+
+/* Export üçün: bütün dashboard sahəsi */
+#dashboard{max-width:1100px;margin:0 auto}
+
+/* ===== MOBILE ===== */
+@media (max-width:768px){
+  body{padding:10px;-webkit-text-size-adjust:100%}
+  h1{font-size:18px}
+  h3{font-size:15px}
+  .card{padding:12px;border-radius:10px}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .kpi .v{font-size:15px}
+  .experts{grid-template-columns:1fr}
+  .expert{font-size:13px;line-height:1.5;background:#fafafa}
+  #targetPie{max-width:200px;max-height:200px}
+  #totalPercent{font-size:22px!important}
+  table{font-size:13px}
+}
 </style>
 </head>
 
 <body>
 
-<h1>Telegram Statistikası Dashboard</h1>
-<p>Tarix: <b id="today"></b></p>
-
-<div class="card">
-<h3>Portfel göstəriciləri</h3>
-<div class="kpis" id="mainKpi"></div>
-</div>
-
-<div class="card">
-<h3>Satış</h3>
-<div class="kpis" id="salesKpi"></div>
-</div>
-
-<div class="card">
-<h3>Mütəxəssis satışı</h3>
-<div class="experts" id="experts"></div>
-</div>
-
-<div class="card">
-
-<h3>Ümumi hədəf icrası</h3>
-<div style="text-align:center;margin-bottom:12px">
-  <div style="font-size:14px;color:#64748b">
-    Ümumi icra faizi
+<div id="dashboard">
+  <div class="topbar">
+    <div>
+      <h1>Telegram Statistikası Dashboard</h1>
+      <p>Tarix: <b id="today"></b> <span class="muted" id="lastUpdate"></span></p>
+    </div>
+    <div class="actions">
+      <button class="btn" id="btnRefresh">🔄 Yenilə</button>
+      <button class="btn" id="btnPNG">📤 PNG</button>
+      <button class="btn" id="btnPDF">📄 PDF</button>
+    </div>
   </div>
-  <div id="totalPercent" style="font-size:26px;font-weight:800">
-    --
+
+  <div class="card">
+    <h3>Portfel göstəriciləri</h3>
+    <div class="card-body">
+      <div class="kpis" id="mainKpi"></div>
+    </div>
   </div>
-  <div style="font-size:13px;color:#64748b;margin-top:6px">
 
-    Ümumi hədəf: <b id="totalTargetText">--</b>
+  <div class="card">
+    <h3>Satış</h3>
+    <div class="card-body">
+      <div class="kpis" id="salesKpi"></div>
+    </div>
   </div>
-</div>
 
+  <div class="card">
+    <h3>Mütəxəssis satışı</h3>
+    <div class="card-body">
+      <div class="experts" id="experts"></div>
+    </div>
+  </div>
 
-<canvas id="targetPie"></canvas>
-</div>
+  <div class="card">
+    <h3>Ümumi hədəf icrası</h3>
+    <div class="card-body" style="text-align:center">
+      <div style="font-size:14px;color:#64748b">Ümumi icra faizi</div>
+      <div id="totalPercent" style="font-size:26px;font-weight:800">--</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:8px">
+        Ümumi hədəf: <b id="totalTargetText">--</b>
+      </div>
+      <canvas id="targetPie"></canvas>
+    </div>
+  </div>
 
-<div class="card">
-<h3>Şirkətlər üzrə portfel</h3>
-<table>
-<thead>
-<tr><th>Şirkət</th><th>Aktiv portfel</th><th>PAR30+</th></tr>
-</thead>
-<tbody id="companyTable"></tbody>
-</table>
+  <div class="card">
+    <h3>Şirkətlər üzrə portfel</h3>
+    <div class="card-body table-wrap">
+      <table>
+        <thead>
+          <tr><th>Şirkət</th><th>Aktiv portfel</th><th>PAR30+</th></tr>
+        </thead>
+        <tbody id="companyTable"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <script>
-const SHEET =
-"https://opensheet.elk.sh/17qXOuePLlCtB8Z-J5e7xISkJ0VybGuAVZSxPTXq4ilc/Sheet5";
+const SHEET="https://opensheet.elk.sh/17qXOuePLlCtB8Z-J5e7xISkJ0VybGuAVZSxPTXq4ilc/Sheet5";
 
-document.getElementById("today").innerText =
-new Date().toLocaleDateString("az-AZ");
+document.getElementById("today").innerText = new Date().toLocaleDateString("az-AZ");
 
-fetch(SHEET).then(r=>r.json()).then(rows=>{
-const d = rows[0];
+// chart instance saxlayırıq ki, refresh-də destroy edək
+let pieChart = null;
 
-/* ==== PORTFEL KPI ==== */
-const diff = Number(d.PortfolioDiff);
-const icon = diff>0?"⬆️":diff<0?"⬇️":"";
-document.getElementById("mainKpi").innerHTML = `
-<div class="kpi"><div class="l">Portfel</div><div class="v">
-${Number(d.Portfolio).toLocaleString()} AZN (${icon} ${Math.abs(diff)}%)
-</div></div>
-<div class="kpi"><div class="l">PAR30+</div><div class="v">${d.Par30}</div></div>
-<div class="kpi"><div class="l">Marja</div><div class="v">${d.Marja}</div></div>
-`;
+function toNum(x){
+  // "12,345.67", "12 345", "12.3%" kimi halları təmizləyir
+  if(x === null || x === undefined) return 0;
+  const s = String(x).replace(/\s/g,'').replace(/,/g,'').replace('%','');
+  const n = Number(s);
+  return isNaN(n) ? 0 : n;
+}
 
-/* ==== SATIŞ KPI ==== */
-document.getElementById("salesKpi").innerHTML = `
-<div class="kpi"><div class="l">Hissəli ödəniş</div><div class="v">${Number(d.InstallmentAmount).toLocaleString()} AZN</div></div>
-<div class="kpi"><div class="l">İlkin ödəniş</div><div class="v">${Number(d.FirstPayment).toLocaleString()} AZN</div></div>
-<div class="kpi"><div class="l">Ümumi məbləğ</div><div class="v">${Number(d.TotalAmount).toLocaleString()} AZN</div></div>
-`;
+async function loadData(){
+  const lastUpdate = document.getElementById("lastUpdate");
+  lastUpdate.textContent = "· yenilənir...";
 
-/* ==== MÜTƏXƏSSİSLƏR ==== */
-const experts = [
-{n:d.Expert1,s:d.ExpertSale1,c:d.ExpertCount1,t:d.ExpertTarget1,p:d.ExpertPar1},
-{n:d.Expert2,s:d.ExpertSale2,c:d.ExpertCount2,t:d.ExpertTarget2,p:d.ExpertPar2},
-{n:d.Expert3,s:d.ExpertSale3,c:d.ExpertCount3,t:d.ExpertTarget3,p:d.ExpertPar3}
-];
-const box=document.getElementById("experts"); box.innerHTML="";
-experts.forEach(e=>{
-box.innerHTML+=`
-<div class="expert">
-<b>${e.n}</b><br>
-Satış: ${e.s}<br>
-Say: ${e.c}<br>
-Hədəf icra: ${e.t}<br>
-Portfel: 330,000 AZN<br>
-PAR30+: ${e.p}
-</div>`;
-});
+  const rows = await fetch(SHEET, {cache:"no-store"}).then(r=>r.json());
+  const d = rows[0];
 
-/* ==== PIE ==== */
-/* ==== ƏTRAFLI PIE / DONUT ==== */
-const total = Number(d.TotalTarget);
-const actual = Number(d.TotalActual);
+  lastUpdate.textContent = "· son yenilənmə: " + new Date().toLocaleTimeString("az-AZ");
 
-const percent = total > 0
-  ? ((actual / total) * 100).toFixed(1)
-  : 0;
+  /* KPI */
+  const diff = toNum(d.PortfolioDiff);
+  const icon = diff>0 ? "⬆️" : diff<0 ? "⬇️" : "➖";
 
-// MƏTN KPI-lar
-document.getElementById("totalPercent").innerText = percent + "%";
-document.getElementById("totalTargetText").innerText =
-  total.toLocaleString() + " AZN";
+  document.getElementById("mainKpi").innerHTML = `
+    <div class="kpi">
+      <div class="l">Portfel</div>
+      <div class="v">${toNum(d.Portfolio).toLocaleString()} AZN (${icon} ${Math.abs(diff)}%)</div>
+    </div>
+    <div class="kpi"><div class="l">PAR30+</div><div class="v">${d.Par30}</div></div>
+    <div class="kpi"><div class="l">Marja</div><div class="v">${d.Marja}</div></div>
+  `;
 
-new Chart(document.getElementById("targetPie"), {
-  type: "doughnut",
-  data: {
-    labels: ["İcra olunub", "Qalıq"],
-    datasets: [{
-      data: [actual, total - actual],
-      backgroundColor: ["#2563eb", "#e5e7eb"],
-      borderWidth: 0
-    }]
-  },
-  options: {
-    cutout: "70%",
-    plugins: {
-      legend: {
-        position: "bottom",
-        labels: {
-          boxWidth: 12,
-          padding: 16
-        }
-      },
-      tooltip: {
-        callbacks: {
-          label: ctx => {
-            return ctx.label + ": " +
-              ctx.parsed.toLocaleString() + " AZN";
-          }
-        }
+  /* KPI colors */
+  const kpis = document.querySelectorAll("#mainKpi .kpi");
+  // Portfel diff
+  if(diff >= 5) kpis[0].classList.add("green");
+  else if(diff >= 0) kpis[0].classList.add("yellow");
+  else kpis[0].classList.add("red");
+
+  // PAR30+
+  const par = toNum(d.Par30);
+  if(par <= 3) kpis[1].classList.add("green");
+  else if(par <= 6) kpis[1].classList.add("yellow");
+  else kpis[1].classList.add("red");
+
+  /* Sales */
+  document.getElementById("salesKpi").innerHTML = `
+    <div class="kpi"><div class="l">Hissəli ödəniş</div><div class="v">${toNum(d.InstallmentAmount).toLocaleString()} AZN</div></div>
+    <div class="kpi"><div class="l">İlkin ödəniş</div><div class="v">${toNum(d.FirstPayment).toLocaleString()} AZN</div></div>
+    <div class="kpi"><div class="l">Ümumi məbləğ</div><div class="v">${toNum(d.TotalAmount).toLocaleString()} AZN</div></div>
+  `;
+
+  /* Experts + TOP badge */
+  const experts = [
+    {n:d.Expert1, s:d.ExpertSale1, c:d.ExpertCount1, t:d.ExpertTarget1, p:d.ExpertPar1},
+    {n:d.Expert2, s:d.ExpertSale2, c:d.ExpertCount2, t:d.ExpertTarget2, p:d.ExpertPar2},
+    {n:d.Expert3, s:d.ExpertSale3, c:d.ExpertCount3, t:d.ExpertTarget3, p:d.ExpertPar3}
+  ];
+
+  // TOP mütəxəssis: satış (s) ən böyük olan
+  const salesNums = experts.map(e => toNum(e.s));
+  const topIdx = salesNums.indexOf(Math.max(...salesNums));
+
+  document.getElementById("experts").innerHTML = experts.map((e,i)=>`
+    <div class="expert">
+      <b>${e.n || "-"}</b>
+      ${i===topIdx ? `<span class="badge top">🏆 TOP</span>` : ``}
+      <br>
+      Satış: ${e.s}<br>
+      Say: ${e.c}<br>
+      Hədəf icra: ${e.t}<br>
+      Portfel: 330,000 AZN<br>
+      PAR30+: ${e.p}
+    </div>
+  `).join("");
+
+  /* PIE */
+  const total = toNum(d.TotalTarget);
+  const actual = toNum(d.TotalActual);
+  const percent = total > 0 ? ((actual/total)*100).toFixed(1) : "0.0";
+
+  document.getElementById("totalPercent").innerText = percent + "%";
+  document.getElementById("totalTargetText").innerText = total.toLocaleString() + " AZN";
+
+  let pieColor = "#2563eb";
+  if(Number(percent) >= 90) pieColor = "#16a34a";
+  else if(Number(percent) < 70) pieColor = "#dc2626";
+
+  // refresh zamanı köhnə chartı sil
+  if(pieChart) pieChart.destroy();
+
+  pieChart = new Chart(document.getElementById("targetPie"), {
+    type: "doughnut",
+    data: {
+      labels: ["İcra", "Qalıq"],
+      datasets: [{
+        data: [actual, Math.max(0, total-actual)],
+        backgroundColor: [pieColor, "#e5e7eb"],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      cutout: "70%",
+      plugins: { legend: { position: "bottom" } }
+    }
+  });
+
+  /* Companies */
+  const companies = [
+    ["MyShops", d.MyShopsPortfolio, d.MyShopsPar],
+    ["MyCars", d.MyCarsPortfolio, d.MyCarsPar],
+    ["MyParfume", d.MyParfumePortfolio, d.MyParfumePar],
+    ["MyMobile", d.MyMobilePortfolio, d.MyMobilePar]
+  ];
+  document.getElementById("companyTable").innerHTML = companies.map(c=>`
+    <tr>
+      <td>${c[0]}</td>
+      <td>${toNum(c[1]).toLocaleString()} AZN</td>
+      <td>${c[2]}</td>
+    </tr>
+  `).join("");
+
+  /* Collapse (mobil) */
+  if(window.innerWidth <= 768){
+    document.querySelectorAll(".card").forEach(card=>{
+      if(!card.dataset.collapseReady){
+        card.dataset.collapseReady = "1";
+        card.classList.add("collapsed");
+        card.querySelector("h3").onclick = () => card.classList.toggle("collapsed");
+      }
+    });
+  }
+}
+
+// İlk yükləmə
+loadData();
+
+// Manual refresh
+document.getElementById("btnRefresh").addEventListener("click", loadData);
+
+// Auto refresh (5 dəqiqə)
+setInterval(loadData, 5 * 60 * 1000);
+
+/* ===== Export PNG / PDF ===== */
+async function exportPNG(){
+  const el = document.getElementById("dashboard");
+  const canvas = await html2canvas(el, {scale: 2, backgroundColor: "#f4f6f9"});
+  const a = document.createElement("a");
+  a.href = canvas.toDataURL("image/png");
+  a.download = "telegram-dashboard.png";
+  a.click();
+}
+
+async function exportPDF(){
+  const el = document.getElementById("dashboard");
+  const canvas = await html2canvas(el, {scale: 2, backgroundColor: "#f4f6f9"});
+  const imgData = canvas.toDataURL("image/png");
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p","mm","a4");
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+
+  // şəkli A4-ə sığışdır
+  const imgProps = pdf.getImageProperties(imgData);
+  const imgWidth = pageWidth;
+  const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+  if(imgHeight <= pageHeight){
+    pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+  } else {
+    // çox uzundursa səhifələrə böl
+    let y = 0;
+    let remainingHeight = imgHeight;
+
+    while(remainingHeight > 0){
+      pdf.addImage(imgData, "PNG", 0, y, imgWidth, imgHeight);
+      remainingHeight -= pageHeight;
+      if(remainingHeight > 0){
+        pdf.addPage();
+        y -= pageHeight;
       }
     }
-  },
-  plugins: [{
-    id: "centerText",
-    afterDraw(chart) {
-      const {ctx, width, height} = chart;
-      ctx.save();
-      ctx.font = "bold 22px Segoe UI";
-      ctx.fillStyle = "#111827";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(percent + "%", width / 2, height / 2);
-      ctx.restore();
-    }
-  }]
-});
+  }
 
+  pdf.save("telegram-dashboard.pdf");
+}
 
-/* ==== ŞİRKƏTLƏR ==== */
-const companies=[
-["MyShops",d.MyShopsPortfolio,d.MyShopsPar],
-["MyCars",d.MyCarsPortfolio,d.MyCarsPar],
-["MyParfume",d.MyParfumePortfolio,d.MyParfumePar],
-["MyMobile",d.MyMobilePortfolio,d.MyMobilePar]
-];
-const t=document.getElementById("companyTable");
-companies.forEach(c=>{
-t.innerHTML+=`<tr><td>${c[0]}</td><td>${Number(c[1]).toLocaleString()} AZN</td><td>${c[2]}</td></tr>`;
-});
-});
+document.getElementById("btnPNG").addEventListener("click", exportPNG);
+document.getElementById("btnPDF").addEventListener("click", exportPDF);
 </script>
 
 </body>
