@@ -119,6 +119,19 @@ th{color:#6b7280}
     font-size:12px;
   }
 }
+/* ===== COLLAPSE CARDS ===== */
+.card h3{
+  cursor:pointer;
+  user-select:none;
+}
+
+.card-body{
+  margin-top:8px;
+}
+
+.card.collapsed .card-body{
+  display:none;
+}
 
 </style>
 </head>
@@ -137,31 +150,40 @@ th{color:#6b7280}
 
   <div class="card">
     <h3>Portfel göstəriciləri</h3>
-    <div class="kpis" id="mainKpi"></div>
+    <div class="card-body">
+     <div class="kpis" id="mainKpi"></div>
+     </div>
   </div>
 
   <div class="card">
     <h3>Satış</h3>
+    <div class="card-body">
     <div class="kpis" id="salesKpi"></div>
+    </div>
   </div>
 
   <div class="card">
     <h3>Mütəxəssis satışı</h3>
+    <div class="card-body">
     <div class="experts" id="experts"></div>
+    </div>
   </div>
 
   <div class="card">
     <h3>Ümumi hədəf icrası</h3>
+    <div class="card-body">
     <div style="text-align:center">
       <div id="totalPercent" style="font-size:26px;font-weight:800"></div>
       <div>Ümumi hədəf: <b id="totalTargetText"></b></div>
       <canvas id="targetPie"></canvas>
+    </div>
     </div>
   </div>
 
   <!-- Şirkətlər üzrə portfel (dashboard-un İÇİNDƏ) -->
   <div class="card">
     <h3>Şirkətlər üzrə portfel</h3>
+    <div class="card-body">
     <div class="table-wrap">
       <table>
         <thead>
@@ -173,6 +195,7 @@ th{color:#6b7280}
         </thead>
         <tbody id="companyTable"></tbody>
       </table>
+    </div>
     </div>
   </div>
 </div>
@@ -322,6 +345,12 @@ document.getElementById("btnPDF").addEventListener("click", async ()=>{
   const h = (canvas.height * w) / canvas.width;
   pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, w, h);
   pdf.save("dashboard.pdf");
+});
+// ===== COLLAPSE LOGIC =====
+document.querySelectorAll(".card h3").forEach(h3=>{
+  h3.addEventListener("click", ()=>{
+    h3.parentElement.classList.toggle("collapsed");
+  });
 });
 
 </script>
