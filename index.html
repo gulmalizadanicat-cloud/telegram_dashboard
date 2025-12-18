@@ -58,6 +58,67 @@ th{color:#6b7280}
 .top-actions button:hover{
   background:#f8fafc;
 }
+/* ===== MOBILE FIXES ===== */
+@media (max-width: 768px){
+
+  body{
+    padding:10px;
+    overflow-x:hidden;
+  }
+
+  #dashboard{
+    max-width:100%;
+  }
+
+  h1{
+    font-size:18px;
+  }
+
+  .kpis{
+    grid-template-columns:repeat(2,1fr); /* 4 -> 2 */
+  }
+
+  .experts{
+    grid-template-columns:1fr; /* 3 -> 1 */
+  }
+
+  .expert{
+    font-size:13px;
+    line-height:1.5;
+  }
+
+  .kpi .v{
+    font-size:15px;
+    word-break:break-word;
+  }
+
+  table{
+    font-size:13px;
+    min-width:520px; /* scroll işləsin */
+  }
+
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  #targetPie{
+    max-width:200px;
+    max-height:200px;
+  }
+
+  /* TOP BUTTONS – mobil üçün yığcam */
+  .top-actions{
+    top:8px;
+    right:8px;
+    gap:6px;
+  }
+
+  .top-actions button{
+    padding:6px 8px;
+    font-size:12px;
+  }
+}
 
 </style>
 </head>
