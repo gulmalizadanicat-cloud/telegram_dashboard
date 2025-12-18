@@ -2,7 +2,7 @@
 <html lang="az">
 <head>
 <meta charset="UTF-8">
-<title>Telegram Statistikası Dashboard</title>
+<title>MyGroup Kredit</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -35,13 +35,43 @@ th{color:#6b7280}
 
 /* şirkət cədvəli üçün scroll */
 .table-wrap{width:100%;overflow-x:auto}
+/* ===== TOP ACTION BUTTONS ===== */
+.top-actions{
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 9999;
+}
+
+.top-actions button{
+  border:1px solid #e5e7eb;
+  background:#fff;
+  border-radius:10px;
+  padding:8px 12px;
+  cursor:pointer;
+  font-size:13px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+
+.top-actions button:hover{
+  background:#f8fafc;
+}
+
 </style>
 </head>
 
 <body>
+<div class="top-actions">
+  <button id="btnRefresh">🔄 Yenilə</button>
+  <button id="btnPNG">📤 PNG</button>
+  <button id="btnPDF">📄 PDF</button>
+</div>
+
 
 <div id="dashboard">
-  <h1>Telegram Statistikası Dashboard</h1>
+  <h1>MyGroup Kredit</h1>
   <p>Tarix: <b id="today"></b> <span id="lastUpdate" style="color:#6b7280"></span></p>
 
   <div class="card">
@@ -121,7 +151,7 @@ async function loadData(){
     <div class="kpi"><div class="l">PAR30+</div><div class="v">${d.Par30 ?? "-"}</div></div>
     <div class="kpi"><div class="l">Marja</div><div class="v">${d.Marja ?? "-"}</div></div>
     <div class="kpi"><div class="l">Aylıq orta yığım</div><div class="v">${monthlyCollection.toLocaleString()} AZN</div></div>
-    <div class="kpi"><div class="l">Orta kredit müddəti</div><div class="v">${avgTerm.toFixed(1)} ay</div></div>
+    <div class="kpi"><div class="l">Orta kredit müddəti</div><div class="v">${avgTerm.toFixed(3)} ay</div></div>
   `;
 
   // KPI rəngləri (portfel + par30)
@@ -210,9 +240,30 @@ async function loadData(){
 
 loadData();
 setInterval(loadData, 5*60*1000);
+// 🔄 YENİLƏ
+document.getElementById("btnRefresh").addEventListener("click", loadData);
+
+// 📤 PNG EXPORT
+document.getElementById("btnPNG").addEventListener("click", async ()=>{
+  const canvas = await html2canvas(document.getElementById("dashboard"), {scale:2});
+  const a = document.createElement("a");
+  a.href = canvas.toDataURL("image/png");
+  a.download = "dashboard.png";
+  a.click();
+});
+
+// 📄 PDF EXPORT
+document.getElementById("btnPDF").addEventListener("click", async ()=>{
+  const canvas = await html2canvas(document.getElementById("dashboard"), {scale:2});
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p","mm","a4");
+  const w = pdf.internal.pageSize.getWidth();
+  const h = (canvas.height * w) / canvas.width;
+  pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, w, h);
+  pdf.save("dashboard.pdf");
+});
+
 </script>
 
 </body>
 </html>
-
-
