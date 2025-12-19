@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>MyGroup Kredit | Ultra Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -32,101 +32,113 @@
         }
 
         body {
-            margin: 0; padding: 20px;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0; padding: 15px;
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
             background: var(--bg-color);
             color: var(--text-main);
-            transition: background 0.3s, color 0.3s;
+            transition: all 0.3s;
+            -webkit-font-smoothing: antialiased;
         }
 
-        #dashboard { max-width: 1200px; margin: 0 auto; }
+        #dashboard { max-width: 1200px; margin: 0 auto; padding-top: 50px; }
 
         .header-box {
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+            margin-bottom: 25px;
+            padding: 0 5px;
         }
 
         h1 {
-            font-size: 32px; font-weight: 800; margin: 0; color: var(--primary-blue);
+            font-size: 24px; font-weight: 800; margin: 5px 0; color: var(--primary-blue);
             letter-spacing: -0.5px;
-            display: inline-block;
         }
 
         .live-indicator {
-            background: var(--success); color: white; padding: 4px 12px;
-            border-radius: 20px; font-size: 11px; font-weight: 800;
-            margin-left: 10px; vertical-align: middle; animation: pulse 2s infinite;
+            background: var(--success); color: white; padding: 3px 10px;
+            border-radius: 20px; font-size: 10px; font-weight: 800;
+            margin-left: 5px; vertical-align: middle; animation: pulse 2s infinite;
         }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
         .date-container {
-            margin-top: 5px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-muted);
+            font-size: 12px; font-weight: 600; color: var(--text-muted);
         }
 
         .main-container {
-            background: var(--card-bg); border-radius: 24px; padding: 32px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+            background: var(--card-bg); border-radius: 20px; padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
             border: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
         }
 
         .section-header {
-            font-size: 18px; font-weight: 800; color: var(--primary-blue);
-            margin: 25px 0 15px 0; display: flex; justify-content: space-between;
+            font-size: 16px; font-weight: 800; color: var(--primary-blue);
+            margin: 20px 0 10px 0; display: flex; justify-content: space-between;
             align-items: center; cursor: pointer; user-select: none;
-            padding: 10px; border-bottom: 2px solid rgba(0,0,0,0.05);
-            transition: 0.2s;
+            padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.05);
+            background: rgba(0,0,0,0.01); border-radius: 10px;
         }
-        .section-header:hover { background: rgba(0,0,0,0.02); border-radius: 8px; }
 
-        .section-header::after { content: '▼'; font-size: 12px; transition: transform 0.3s; }
+        .section-header::after { content: '▼'; font-size: 10px; transition: transform 0.3s; }
         .collapsed .section-header::after { transform: rotate(-90deg); }
         .collapsed .section-content { display: none; }
 
-        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+        /* KPI Mobil Optimallaşdırma */
+        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
         .kpi-box {
-            background: rgba(0,0,0,0.02); padding: 20px; border-radius: 16px;
-            border: 1px solid rgba(0,0,0,0.05); transition: all 0.3s;
+            background: rgba(0,0,0,0.02); padding: 15px; border-radius: 14px;
+            border: 1px solid rgba(0,0,0,0.04);
         }
-        .kpi-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-        .kpi-val { font-size: 22px; font-weight: 800; margin-top: 8px; color: var(--primary-blue); }
+        .kpi-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .kpi-val { font-size: 16px; font-weight: 800; margin-top: 5px; color: var(--primary-blue); }
 
-        .expert-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        /* Mütəxəssis Kartları Mobil */
+        .expert-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
         .expert-card {
-            background: var(--card-bg); border-radius: 16px; padding: 20px;
-            border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            background: var(--card-bg); border-radius: 14px; padding: 15px;
+            border: 1px solid rgba(0,0,0,0.06);
         }
 
-        .progress-container { height: 6px; background: rgba(0,0,0,0.05); border-radius: 10px; overflow: hidden; margin: 12px 0; }
-        .progress-fill { height: 100%; transition: width 1.5s cubic-bezier(0.1, 0, 0.1, 1); }
+        .progress-container { height: 8px; background: rgba(0,0,0,0.05); border-radius: 10px; margin: 10px 0; }
+        .progress-fill { height: 100%; border-radius: 10px; }
 
-        .charts-row { display: grid; grid-template-columns: 350px 1fr; gap: 30px; align-items: center; }
-        .chart-box-inner { background: rgba(0,0,0,0.02); padding: 20px; border-radius: 20px; position: relative; }
+        /* Chart Mobil Optimallaşdırma */
+        .charts-row { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .chart-box-inner { 
+            background: rgba(0,0,0,0.02); padding: 15px; border-radius: 18px; 
+            position: relative; min-height: 220px; 
+        }
 
-        .top-actions { position: fixed; top: 15px; right: 15px; z-index: 1001; display: flex; gap: 8px; }
+        .top-actions { 
+            position: fixed; top: 0; left: 0; right: 0; 
+            z-index: 1001; display: flex; gap: 5px; padding: 10px;
+            background: var(--bg-color); border-bottom: 1px solid rgba(0,0,0,0.05);
+            justify-content: center;
+        }
         .top-actions button {
-            background: var(--card-bg); border: 1px solid var(--accent-blue); padding: 8px 16px;
-            border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 13px;
-            color: var(--text-main); box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.2s;
+            background: var(--card-bg); border: 1px solid var(--accent-blue); padding: 6px 12px;
+            border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px;
+            color: var(--text-main); flex: 1; max-width: 110px;
         }
-        .top-actions button:hover { background: var(--accent-blue); color: white; }
 
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 11px; text-transform: uppercase; border-bottom: 2px solid rgba(0,0,0,0.05); }
-        td { padding: 14px 12px; border-bottom: 1px solid rgba(0,0,0,0.05); font-weight: 600; }
+        /* Cədvəl Mobil */
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
+        table { width: 100%; min-width: 300px; border-collapse: collapse; }
+        th { font-size: 10px; padding: 10px; color: var(--text-muted); border-bottom: 2px solid rgba(0,0,0,0.05); }
+        td { padding: 12px 10px; font-size: 13px; border-bottom: 1px solid rgba(0,0,0,0.03); }
 
         .gauge-text-container {
-            position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); text-align: center;
+            position: absolute; top: 65%; left: 50%; transform: translate(-50%, -50%); text-align: center;
+            width: 100%;
         }
 
-        @media (max-width: 900px) {
-            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-            .expert-grid, .charts-row { grid-template-columns: 1fr; }
+        @media (min-width: 768px) {
+            h1 { font-size: 32px; }
+            .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+            .expert-grid { grid-template-columns: repeat(3, 1fr); }
+            .charts-row { grid-template-columns: 350px 1fr; }
+            body { padding: 20px; }
+            .main-container { padding: 32px; }
+            .kpi-val { font-size: 22px; }
+            .top-actions { justify-content: flex-end; padding: 15px; background: transparent; border: none; }
         }
     </style>
 </head>
@@ -135,16 +147,16 @@
 <div class="top-actions">
     <button onclick="document.body.classList.toggle('dark-mode')">🌓 Rejim</button>
     <button id="btnRefresh">🔄 Yenilə</button>
-    <button id="btnPDF">📄 PDF Yüklə</button>
+    <button id="btnPDF">📄 PDF</button>
 </div>
 
 <div id="dashboard">
     <div class="header-box">
         <div>
-            <p style="color: var(--text-muted); font-weight: 700; margin: 0; font-size: 12px; text-transform: uppercase;">MyGroup Holding</p>
+            <p style="color: var(--text-muted); font-weight: 700; margin: 0; font-size: 10px; text-transform: uppercase;">MyGroup Holding</p>
             <h1>MyGroup Kredit <span class="live-indicator">LIVE</span></h1>
             <div class="date-container">
-                📅 Tarix: <span id="today">--.--.----</span> | 🕒 <span id="lastUpdate">Yüklənir...</span>
+                📅 <span id="today">--.--.----</span> | <span id="lastUpdate">...</span>
             </div>
         </div>
     </div>
@@ -153,8 +165,8 @@
         <div class="collapsible-section">
             <div class="section-header">İcmal Hesabatı</div>
             <div class="section-content">
-                <div id="summaryText" style="line-height: 1.6; font-size: 15px; color: var(--text-main); margin-bottom: 20px; padding: 15px; background: rgba(37, 99, 235, 0.05); border-radius: 12px; border-left: 4px solid var(--accent-blue);">
-                    Məlumatlar təhlil edilir...
+                <div id="summaryText" style="line-height: 1.5; font-size: 14px; margin-bottom: 15px; padding: 12px; background: rgba(37, 99, 235, 0.05); border-radius: 12px; border-left: 4px solid var(--accent-blue);">
+                    Yüklenir...
                 </div>
             </div>
         </div>
@@ -167,14 +179,14 @@
         </div>
 
         <div class="collapsible-section">
-            <div class="section-header">Ümumi hədəf icrası və 2025 trend</div>
+            <div class="section-header">Hədəf və Trend</div>
             <div class="section-content">
                 <div class="charts-row">
-                    <div class="chart-box-inner" style="height: 250px;">
+                    <div class="chart-box-inner">
                         <canvas id="targetGauge"></canvas>
                         <div class="gauge-text-container">
-                            <div id="gaugeLabel" style="font-size: 28px; font-weight: 900; color: var(--primary-blue);">0%</div>
-                            <div style="margin-top: 5px; font-weight: 700; font-size: 12px; color: var(--text-muted);">Hədəf: <br><span id="totalTargetText">-</span></div>
+                            <div id="gaugeLabel" style="font-size: 24px; font-weight: 900; color: var(--primary-blue);">0%</div>
+                            <div style="font-weight: 700; font-size: 10px; color: var(--text-muted);">HƏDƏF: <br><span id="totalTargetText">-</span></div>
                         </div>
                     </div>
                     <div class="chart-box-inner">
@@ -185,22 +197,22 @@
         </div>
 
         <div class="collapsible-section">
-            <div class="section-header">Mütəxəssis Performansı</div>
+            <div class="section-header">Mütəxəssislər</div>
             <div class="section-content">
                 <div class="expert-grid" id="experts"></div>
             </div>
         </div>
 
         <div class="collapsible-section">
-            <div class="section-header">Şirkətlər üzrə bölgü</div>
+            <div class="section-header">Şirkətlər</div>
             <div class="section-content">
-                <div style="overflow-x: auto;">
+                <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
-                                <th>Şirkət Adı</th>
-                                <th>Aktiv Portfel</th>
-                                <th>Gecikmə (PAR30+)</th>
+                                <th>Şirkət</th>
+                                <th>Portfel</th>
+                                <th>PAR30+</th>
                             </tr>
                         </thead>
                         <tbody id="companyTable"></tbody>
@@ -218,7 +230,6 @@
     let charts = {};
     document.getElementById("today").innerText = new Date().toLocaleDateString("az-AZ");
 
-    // Collapsible Logic
     document.querySelectorAll('.section-header').forEach(header => {
         header.onclick = () => header.parentElement.classList.toggle('collapsed');
     });
@@ -236,33 +247,31 @@
             ]);
             
             const d = rows[0] || {};
-            document.getElementById("lastUpdate").innerText = "Son yenilənmə: " + new Date().toLocaleTimeString("az-AZ");
+            document.getElementById("lastUpdate").innerText = new Date().toLocaleTimeString("az-AZ", {hour:'2-digit', minute:'2-digit'});
 
             const diff = toNum(d.PortfolioDiff);
             const trendIcon = diff > 0 ? "↑" : diff < 0 ? "↓" : "→";
             
-            // KPI Grid
             document.getElementById("mainKpi").innerHTML = `
                 <div class="kpi-box" style="background: var(--primary-blue); color: white;">
-                    <div class="kpi-label" style="color: rgba(255,255,255,0.7)">Aktiv Portfel</div>
+                    <div class="kpi-label" style="color: rgba(255,255,255,0.7)">Portfel</div>
                     <div class="kpi-val" style="color: white">${toNum(d.Portfolio).toLocaleString()} ₼</div>
-                    <div style="font-size: 11px; margin-top: 5px; font-weight: 700;">${trendIcon} ${Math.abs(diff)}%</div>
+                    <div style="font-size: 10px; font-weight: 700;">${trendIcon} ${Math.abs(diff)}%</div>
                 </div>
                 <div class="kpi-box">
-                    <div class="kpi-label">PAR30+ Gecikmə</div>
-                    <div class="kpi-val" style="color: ${toNum(d.Par30) > 5 ? 'var(--danger)' : 'var(--primary-blue)'}">${d.Par30 || "0%"}</div>
+                    <div class="kpi-label">PAR30+</div>
+                    <div class="kpi-val" style="color: ${toNum(d.Par30) > 5 ? 'var(--danger)' : 'var(--success)'}">${d.Par30 || "0%"}</div>
                 </div>
                 <div class="kpi-box">
-                    <div class="kpi-label">Aylıq Yığım</div>
+                    <div class="kpi-label">Yığım</div>
                     <div class="kpi-val">${toNum(d.MonthlyExpectedCollection).toLocaleString()} ₼</div>
                 </div>
                 <div class="kpi-box">
-                    <div class="kpi-label">Ümumi Satış</div>
+                    <div class="kpi-label">Satış</div>
                     <div class="kpi-val">${toNum(d.TotalAmount).toLocaleString()} ₼</div>
                 </div>
             `;
 
-            // Gauge Chart Fix
             const total = toNum(d.TotalTarget);
             const actual = toNum(d.TotalActual);
             const percent = total > 0 ? Math.min((actual / total) * 100, 100).toFixed(1) : 0;
@@ -277,36 +286,26 @@
                     datasets: [{
                         data: [percent, 100 - percent],
                         backgroundColor: ['#2563eb', '#e2e8f0'],
-                        borderWidth: 0,
-                        circumference: 180,
-                        rotation: 270,
-                        cutout: '85%'
+                        borderWidth: 0, circumference: 180, rotation: 270, cutout: '85%'
                     }]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    plugins: { tooltip: { enabled: false } } 
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { enabled: false } } }
             });
 
-            // Trend Chart
             if (charts.line) charts.line.destroy();
             charts.line = new Chart(document.getElementById("installmentLine"), {
                 type: 'line',
                 data: {
                     labels: trendRows.map(r => r.Ay),
                     datasets: [{
-                        label: 'Satış',
                         data: trendRows.map(r => toNum(r.Hissəli_Odenis)),
                         borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                        fill: true, tension: 0.4, pointRadius: 4
+                        fill: true, tension: 0.4, pointRadius: 2
                     }]
                 },
-                options: { responsive: true, plugins: { legend: {display: false} } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false} } }
             });
 
-            // Expert Performance
             const experts = [
                 {n:d.Expert1, s:toNum(d.ExpertSale1), t:toNum(d.ExpertTarget1), h:toNum(d.Expert1Target)},
                 {n:d.Expert2, s:toNum(d.ExpertSale2), t:toNum(d.ExpertTarget2), h:toNum(d.Expert2Target)},
@@ -314,16 +313,15 @@
             ];
             document.getElementById("experts").innerHTML = experts.map(e => `
                 <div class="expert-card">
-                    <div style="font-weight: 800; margin-bottom:10px; color: var(--primary-blue);">${e.n || "Mütəxəssis"}</div>
-                    <div style="font-size:13px; margin-bottom:5px;">Satış: <b>${e.s.toLocaleString()} ₼</b></div>
+                    <div style="font-weight: 800; font-size:14px; margin-bottom:8px; color: var(--primary-blue);">${e.n || "Mütəxəssis"}</div>
+                    <div style="font-size:12px;">Satış: <b>${e.s.toLocaleString()} ₼</b></div>
                     <div class="progress-container"><div class="progress-fill" style="width:${Math.min(e.t, 100)}%; background:#2563eb"></div></div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:700;">
+                    <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:700;">
                         <span>İCRA: ${e.t}%</span>
-                        <span style="color:var(--text-muted)">HƏDƏF: ${e.h.toLocaleString()} ₼</span>
+                        <span>HƏDƏF: ${e.h.toLocaleString()} ₼</span>
                     </div>
                 </div>`).join("");
 
-            // Companies
             const cos = [
                 ["MyShops", d.MyShopsPortfolio, d.MyShopsPar],
                 ["MyCars", d.MyCarsPortfolio, d.MyCarsPar],
@@ -332,40 +330,26 @@
             ];
             document.getElementById("companyTable").innerHTML = cos.map(c => `
                 <tr>
-                    <td>${c[0]}</td>
+                    <td><b>${c[0]}</b></td>
                     <td>${toNum(c[1]).toLocaleString()} ₼</td>
                     <td style="color:${toNum(c[2]) > 5 ? 'var(--danger)' : 'var(--success)'}">${c[2] || "0%"}</td>
                 </tr>`).join("");
 
-            document.getElementById("summaryText").innerHTML = `
-                Aktiv portfel bu ay <b>${trendIcon} ${Math.abs(diff)}%</b> dəyişərək <b>${toNum(d.Portfolio).toLocaleString()} ₼</b> olmuşdur. 
-                Ümumi hədəf icrası <b>${percent}%</b> təşkil edir.
-            `;
+            document.getElementById("summaryText").innerHTML = `Portfel <b>${trendIcon} ${Math.abs(diff)}%</b> dəyişib. Hədəf icrası <b>${percent}%</b>-dir.`;
 
         } catch(e) { console.error("Xəta:", e); }
     }
 
-    // PDF Export Function
     document.getElementById("btnPDF").onclick = async () => {
         const { jsPDF } = window.jspdf;
         const btn = document.getElementById("btnPDF");
-        const originalText = btn.innerText;
-        btn.innerText = "Hazırlanır...";
-
-        const canvas = await html2canvas(document.getElementById("dashboard"), {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: document.body.classList.contains('dark-mode') ? "#0f172a" : "#f0f4f8"
-        });
-
+        btn.innerText = "...";
+        const canvas = await html2canvas(document.getElementById("dashboard"), { scale: 2, useCORS: true });
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`MyGroup_Kredit_Hesabat_${new Date().toLocaleDateString()}.pdf`);
-        btn.innerText = originalText;
+        pdf.addImage(imgData, 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
+        pdf.save(`MyGroup_Report.pdf`);
+        btn.innerText = "📄 PDF";
     };
 
     document.getElementById("btnRefresh").onclick = loadData;
