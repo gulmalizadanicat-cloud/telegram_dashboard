@@ -132,7 +132,8 @@
 
         @media (min-width: 768px) {
             h1 { font-size: 32px; }
-            .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+            /* KPI grid 3 sütun olsun ki, 6 element səliqəli dursun */
+            .kpi-grid { grid-template-columns: repeat(3, 1fr); } 
             .expert-grid { grid-template-columns: repeat(3, 1fr); }
             .charts-row { grid-template-columns: 350px 1fr; }
             body { padding: 20px; }
@@ -252,6 +253,9 @@
             const diff = toNum(d.PortfolioDiff);
             const trendIcon = diff > 0 ? "↑" : diff < 0 ? "↓" : "→";
             
+            // DÜZƏLİŞ: WeightedAverageTerm sütunundan məlumatı götürür
+            const avgTerm = d.WeightedAverageTerm || d.Orta_Muddet || "-";
+
             document.getElementById("mainKpi").innerHTML = `
                 <div class="kpi-box" style="background: var(--primary-blue); color: white;">
                     <div class="kpi-label" style="color: rgba(255,255,255,0.7)">Portfel</div>
@@ -269,6 +273,14 @@
                 <div class="kpi-box">
                     <div class="kpi-label">Satış</div>
                     <div class="kpi-val">${toNum(d.TotalAmount).toLocaleString()} ₼</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-label">Marja</div>
+                    <div class="kpi-val">${d.Marja || "-"}</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-label">Orta Müddət</div>
+                    <div class="kpi-val">${avgTerm} ay</div>
                 </div>
             `;
 
