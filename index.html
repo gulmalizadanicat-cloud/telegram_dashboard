@@ -81,7 +81,6 @@
         .collapsed .section-header::after { transform: rotate(-90deg); }
         .collapsed .section-content { display: none; }
 
-        /* KPI Mobil Optimallaşdırma */
         .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
         .kpi-box {
             background: rgba(0,0,0,0.02); padding: 15px; border-radius: 14px;
@@ -90,7 +89,6 @@
         .kpi-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
         .kpi-val { font-size: 16px; font-weight: 800; margin-top: 5px; color: var(--primary-blue); }
 
-        /* Mütəxəssis Kartları Mobil */
         .expert-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
         .expert-card {
             background: var(--card-bg); border-radius: 14px; padding: 15px;
@@ -100,7 +98,6 @@
         .progress-container { height: 8px; background: rgba(0,0,0,0.05); border-radius: 10px; margin: 10px 0; }
         .progress-fill { height: 100%; border-radius: 10px; }
 
-        /* Chart Mobil Optimallaşdırma */
         .charts-row { display: grid; grid-template-columns: 1fr; gap: 20px; }
         .chart-box-inner { 
             background: rgba(0,0,0,0.02); padding: 15px; border-radius: 18px; 
@@ -119,7 +116,6 @@
             color: var(--text-main); flex: 1; max-width: 110px;
         }
 
-        /* Cədvəl Mobil */
         .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
         table { width: 100%; min-width: 300px; border-collapse: collapse; }
         th { font-size: 10px; padding: 10px; color: var(--text-muted); border-bottom: 2px solid rgba(0,0,0,0.05); }
@@ -132,7 +128,6 @@
 
         @media (min-width: 768px) {
             h1 { font-size: 32px; }
-            /* KPI grid 3 sütun olsun ki, 6 element səliqəli dursun */
             .kpi-grid { grid-template-columns: repeat(3, 1fr); } 
             .expert-grid { grid-template-columns: repeat(3, 1fr); }
             .charts-row { grid-template-columns: 350px 1fr; }
@@ -229,7 +224,14 @@
     const SHEET_TREND = "https://opensheet.elk.sh/17qXOuePLlCtB8Z-J5e7xISkJ0VybGuAVZSxPTXq4ilc/Installment_2025";
 
     let charts = {};
-    document.getElementById("today").innerText = new Date().toLocaleDateString("az-AZ");
+
+    // TARİXİ YENİLƏYƏN FUNKSİYA (AVTOMATİK)
+    function refreshDate() {
+        const now = new Date();
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+        document.getElementById("today").innerText = now.toLocaleDateString("az-AZ", options);
+    }
+    refreshDate();
 
     document.querySelectorAll('.section-header').forEach(header => {
         header.onclick = () => header.parentElement.classList.toggle('collapsed');
@@ -237,7 +239,9 @@
 
     function toNum(x) {
         if (!x) return 0;
-        return Number(String(x).replace(/\s/g,'').replace(/,/g,'').replace('%','')) || 0;
+        let val = String(x).replace(/\s/g,'').replace(/,/g,'').replace('%','');
+        // Əgər rəqəm deyilsə (məsələn başlıq "Şirkət"), 0 qaytar
+        return isNaN(Number(val)) ? 0 : Number(val);
     }
 
     async function loadData() {
@@ -249,11 +253,10 @@
             
             const d = rows[0] || {};
             document.getElementById("lastUpdate").innerText = new Date().toLocaleTimeString("az-AZ", {hour:'2-digit', minute:'2-digit'});
+            refreshDate(); // Hər yenilənmədə tarixi də yoxla
 
             const diff = toNum(d.PortfolioDiff);
             const trendIcon = diff > 0 ? "↑" : diff < 0 ? "↓" : "→";
-            
-            // DÜZƏLİŞ: WeightedAverageTerm sütunundan məlumatı götürür
             const avgTerm = d.WeightedAverageTerm || d.Orta_Muddet || "-";
 
             document.getElementById("mainKpi").innerHTML = `
