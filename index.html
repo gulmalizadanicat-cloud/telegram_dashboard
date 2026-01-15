@@ -221,7 +221,10 @@
 
 <script>
     const SHEET = "https://opensheet.elk.sh/17qXOuePLlCtB8Z-J5e7xISkJ0VybGuAVZSxPTXq4ilc/Sheet5";
-    const SHEET_TREND = "https://opensheet.elk.sh/17qXOuePLlCtB8Z-J5e7xISkJ0VybGuAVZSxPTXq4ilc/Installment_2025";
+
+    /* ✅ DƏYİŞİKLİK #1: trend üçün 2 ayrı sheet URL (2025 + 2026) */
+    const SHEET_TREND_2025 = "https://opensheet.elk.sh/17qXOuePLlCtB8Z-J5e7xISkJ0VybGuAVZSxPTXq4ilc/Installment_2025";
+    const SHEET_TREND_2026 = "https://opensheet.elk.sh/17qXOuePLlCtB8Z-J5e7xISkJ0VybGuAVZSxPTXq4ilc/Installment_2026";
 
     let charts = {};
 
@@ -246,9 +249,11 @@
 
     async function loadData() {
         try {
-            const [rows, trendRows] = await Promise.all([
+            /* ✅ DƏYİŞİKLİK #2: 3 fetch (Sheet5 + 2025 trend + 2026 trend) */
+            const [rows, trend25, trend26] = await Promise.all([
                 fetch(SHEET, {cache:"no-store"}).then(r=>r.json()),
-                fetch(SHEET_TREND, {cache:"no-store"}).then(r=>r.json())
+                fetch(SHEET_TREND_2025, {cache:"no-store"}).then(r=>r.json()),
+                fetch(SHEET_TREND_2026, {cache:"no-store"}).then(r=>r.json())
             ]);
             
             const d = rows[0] || {};
@@ -307,18 +312,47 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { enabled: false } } }
             });
 
+            /* ✅ DƏYİŞİKLİK #3: Line chart 2 dataset (2025 + 2026) */
             if (charts.line) charts.line.destroy();
+
+            const labels = (trend25 || []).map(r => r.Ay);
+
             charts.line = new Chart(document.getElementById("installmentLine"), {
                 type: 'line',
                 data: {
-                    labels: trendRows.map(r => r.Ay),
-                    datasets: [{
-                        data: trendRows.map(r => toNum(r.Hissəli_Odenis)),
-                        borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                        fill: true, tension: 0.4, pointRadius: 2
-                    }]
+                    labels,
+                    datasets: [
+                        {
+                            label: "2025",
+                            data: labels.map(m => {
+                                const row = (trend25 || []).find(x => x.Ay === m);
+                                return row ? toNum(row.Hissəli_Odenis) : null;
+                            }),
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 2
+                        },
+                        {
+                            label: "2026",
+                            data: labels.map(m => {
+                                const row = (trend26 || []).find(x => x.Ay === m);
+                                return row ? toNum(row.Hissəli_Odenis) : null;
+                            }),
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 2
+                        }
+                    ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false} } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true } }
+                }
             });
 
             const experts = [
