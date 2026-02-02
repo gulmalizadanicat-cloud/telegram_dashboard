@@ -246,6 +246,11 @@
         // Əgər rəqəm deyilsə (məsələn başlıq "Şirkət"), 0 qaytar
         return isNaN(Number(val)) ? 0 : Number(val);
     }
+        function trendWord(diff) {
+        if (diff > 0) return "artıb";
+        if (diff < 0) return "azalıb";
+        return "sabitdir";
+    }
 
     async function loadData() {
         try {
@@ -401,11 +406,12 @@ charts.line = new Chart(document.getElementById("installmentLine"), {
                     <td style="color:${toNum(c[2]) > 5 ? 'var(--danger)' : 'var(--success)'}">${c[2] || "0%"}</td>
                 </tr>`).join("");
 
-            document.getElementById("summaryText").innerHTML =
-                  `Portfel <b>${trendIcon} ${Math.abs(diff)}%</b> dəyişib. ` +
-                  `PAR30 <b>${(parDiff > 0 ? "↑" : parDiff < 0 ? "↓" : "→")} ${Math.abs(parDiff)}%</b> dəyişib. ` +
-                  `Marja <b>${(marjaDiff > 0 ? "↑" : marjaDiff < 0 ? "↓" : "→")} ${Math.abs(marjaDiff)}%</b> dəyişib. ` +
-                  `Hədəf icrası <b>${percent}%</b>-dir.`;
+             document.getElementById("summaryText").innerHTML =
+                      `Portfel <b>${Math.abs(diff)}%</b> ${trendWord(diff)}. ` +
+                      `PAR30 <b>${Math.abs(parDiff)}%</b> ${trendWord(parDiff)}. ` +
+                      `Marja <b>${Math.abs(marjaDiff)}%</b> ${trendWord(marjaDiff)}. ` +
+                      `Hədəf icrası <b>${percent}%</b>-dir.`;
+
 
 
         } catch(e) { console.error("Xəta:", e); }
@@ -428,5 +434,6 @@ charts.line = new Chart(document.getElementById("installmentLine"), {
 </script>
 </body>
 </html>
+
 
 
