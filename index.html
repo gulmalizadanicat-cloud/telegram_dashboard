@@ -323,45 +323,54 @@
             /* ✅ DƏYİŞİKLİK #3: Line chart 2 dataset (2025 + 2026) */
             if (charts.line) charts.line.destroy();
 
-            const labels = (trend25 || []).map(r => r.Ay);
+            /* Line chart: 2025 + 2026 (ay üzrə müqayisə) */
+if (charts.line) charts.line.destroy();
 
-            charts.line = new Chart(document.getElementById("installmentLine"), {
-                type: 'line',
-                data: {
-                    labels,
-                    datasets: [
-                        {
-                            label: "2025",
-                            data: labels.map(m => {
-                                const row = (trend25 || []).find(x => x.Ay === m);
-                                return row ? toNum(row.Hissəli_Odenis) : null;
-                            }),
-                            borderColor: '#2563eb',
-                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 2
-                        },
-                        {
-                            label: "2026",
-                            data: labels.map(m => {
-                                const row = (trend26 || []).find(x => x.Ay === m);
-                                return row ? toNum(row.Hissəli_Odenis) : null;
-                            }),
-                            borderColor: '#dc2626',
-                            backgroundColor: 'rgba(220, 38, 38, 0.12)',
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 2
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: true } }
-                }
-            });
+// Ay label-ları həmişə sabit olsun
+const labels = ["01","02","03","04","05","06","07","08","09","10","11","12"];
+
+// "2026-02" -> "02"
+const monthKey = (ay) => String(ay || "").slice(5, 7);
+
+// Map qururuq: ay_nömrəsi -> dəyər
+const map25 = new Map((trend25 || []).map(r => [monthKey(r.Ay), toNum(r.Hissəli_Odenis)]));
+const map26 = new Map((trend26 || []).map(r => [monthKey(r.Ay), toNum(r.Hissəli_Odenis)]));
+
+// Qrafik dataları (olmayan aylar null qalsın)
+const data25 = labels.map(m => map25.has(m) ? map25.get(m) : null);
+const data26 = labels.map(m => map26.has(m) ? map26.get(m) : null);
+
+charts.line = new Chart(document.getElementById("installmentLine"), {
+  type: "line",
+  data: {
+    labels,
+    datasets: [
+      {
+        label: "2025",
+        data: data25,
+        borderColor: "#2563eb",
+        backgroundColor: "rgba(37, 99, 235, 0.1)",
+        fill: true,
+        tension: 0.4,
+        pointRadius: 2
+      },
+      {
+        label: "2026",
+        data: data26,
+        borderColor: "#dc2626",
+        backgroundColor: "rgba(220, 38, 38, 0.12)",
+        fill: true,
+        tension: 0.4,
+        pointRadius: 2
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: true } }
+  }
+});
 
             const experts = [
                 {n:d.Expert1, s:toNum(d.ExpertSale1), t:toNum(d.ExpertTarget1), h:toNum(d.Expert1Target)},
@@ -419,4 +428,5 @@
 </script>
 </body>
 </html>
+
 
