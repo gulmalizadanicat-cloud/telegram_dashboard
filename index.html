@@ -270,6 +270,9 @@
             const parDiff = toNum(d.Par30Diff);
             const marjaDiff = toNum(d.MarjaDiff);
             const avgTerm = d.WeightedAverageTerm || d.Orta_Muddet || "-";
+            const par30Amount = toNum(d.Par30Amount);
+            const cureAmount  = toNum(d.CureAmount);
+
 
             document.getElementById("mainKpi").innerHTML = `
                 <div class="kpi-box" style="background: var(--primary-blue); color: white;">
@@ -283,6 +286,14 @@
                     <div style="font-size: 10px; font-weight: 700;">
                     ${(parDiff > 0 ? "↑" : parDiff < 0 ? "↓" : "→")} ${Math.abs(parDiff)}%
                     </div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-label">PAR30 Cəmi Məbləğ</div>
+                    <div class="kpi-val">${par30Amount.toLocaleString()} ₼</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-label">Gecikmədən Çıxma Məbləği</div>
+                    <div class="kpi-val">${cureAmount.toLocaleString()} ₼</div>
                 </div>
                 <div class="kpi-box">
                     <div class="kpi-label">Yığım</div>
@@ -434,6 +445,7 @@ charts.line = new Chart(document.getElementById("installmentLine"), {
 </script>
 </body>
 </html>
+
 
 
 
