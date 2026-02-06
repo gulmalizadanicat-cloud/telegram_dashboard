@@ -272,6 +272,8 @@
             const avgTerm = d.WeightedAverageTerm || d.Orta_Muddet || "-";
             const par30Amount = toNum(d.Par30Amount);
             const cureAmount  = toNum(d.CureAmount);
+            const activeCustomers = toNum(d["Aktiv müştəri sayı"]);
+
 
 
             document.getElementById("mainKpi").innerHTML = `
@@ -279,6 +281,9 @@
                     <div class="kpi-label" style="color: rgba(255,255,255,0.7)">Portfel</div>
                     <div class="kpi-val" style="color: white">${toNum(d.Portfolio).toLocaleString()} ₼</div>
                     <div style="font-size: 10px; font-weight: 700;">${trendIcon} ${Math.abs(diff)}%</div>
+                    <div style="font-size: 11px; margin-top: 6px; color: rgba(255,255,255,0.85); font-weight: 800;">
+                                Aktiv müştəri: ${activeCustomers.toLocaleString()}
+                                </div>
                 </div>
                 <div class="kpi-box">
                     <div class="kpi-label">PAR30+</div>
@@ -447,6 +452,7 @@ charts.line = new Chart(document.getElementById("installmentLine"), {
 </script>
 </body>
 </html>
+
 
 
 
