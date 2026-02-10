@@ -285,22 +285,18 @@
     header.onclick = () => header.parentElement.classList.toggle('collapsed');
   });
 
-  // DÜZƏLDİLMİŞ: 1.284.640 / 35.571,00 / 702,00 kimi formatları düzgün çevirir
+  // BUNA TOXUNMURUQ (səndə işləyən variant)
   function toNum(x) {
     if (x === null || x === undefined || x === "") return 0;
 
     let s = String(x).trim();
-
     s = s.replace(/\s/g, "").replace("₼", "").replace("%", "");
 
     if (s.includes(".") && s.includes(",")) {
-      // 35.571,00 -> 35571.00
       s = s.replace(/\./g, "").replace(/,/g, ".");
     } else if (s.includes(",") && !s.includes(".")) {
-      // 702,00 -> 702.00
       s = s.replace(/,/g, ".");
     } else {
-      // 1.284.640 -> 1284640
       s = s.replace(/\./g, "");
     }
 
@@ -308,8 +304,13 @@
     return Number.isFinite(n) ? n : 0;
   }
 
-  function fmtMoney(n) {
-    return (Number(n) || 0).toLocaleString("az-AZ") + " ₼";
+  // Sənin istədiyin format: minliklər nöqtə ilə (1.234.567) + ₼
+  function fmtDot(n) {
+    const num = Number(n) || 0;
+    return num.toLocaleString("en-US").replace(/,/g, ".");
+  }
+  function fmtManat(n) {
+    return fmtDot(n) + " ₼";
   }
 
   function trendWord(diff) {
@@ -330,7 +331,6 @@
 
       document.getElementById("lastUpdate").innerText =
         new Date().toLocaleTimeString("az-AZ", { hour: '2-digit', minute: '2-digit' });
-
       refreshDate();
 
       const diff = toNum(d.PortfolioDiff);
@@ -341,23 +341,23 @@
 
       const avgTerm = d.WeightedAverageTerm || d.Orta_Muddet || "-";
 
-      const par30Amount = toNum(d.Par30Amount);
-      const cureAmount  = toNum(d.CureAmount);
-
-      const activeCustomers = toNum(d["Aktiv müştəri sayı"]);
-
       const portfolioVal = toNum(d.Portfolio);
       const yigimVal = toNum(d.MonthlyExpectedCollection);
       const satisVal = toNum(d.TotalAmount);
 
-      // KPI-lar
+      const par30Amount = toNum(d.Par30Amount);
+      const cureAmount  = toNum(d.CureAmount);
+
+      const activeCustomers = toNum(d["Aktiv müştəri sayı"]);
+      const installmentAmount = toNum(d.InstallmentAmount); // başlıq: InstallmentAmount
+
       document.getElementById("mainKpi").innerHTML = `
         <div class="kpi-box" style="background: var(--primary-blue); color: white;">
           <div class="kpi-label" style="color: rgba(255,255,255,0.7)">Portfel</div>
-          <div class="kpi-val" style="color: white">${fmtMoney(portfolioVal)}</div>
+          <div class="kpi-val" style="color: white">${fmtManat(portfolioVal)}</div>
           <div style="font-size: 10px; font-weight: 700;">${trendIcon} ${Math.abs(diff)}%</div>
           <div style="font-size: 11px; margin-top: 6px; color: rgba(255,255,255,0.85); font-weight: 800;">
-            Aktiv müştəri: ${activeCustomers.toLocaleString("az-AZ")}
+            Aktiv müştəri: ${fmtDot(activeCustomers)}
           </div>
         </div>
 
@@ -371,22 +371,26 @@
           </div>
 
           <div style="font-size: 11px; margin-top: 6px; color: var(--text-muted); font-weight: 700;">
-            PAR30 məbləği: <span style="color: var(--text-main)">${fmtMoney(par30Amount)}</span>
+            PAR30 məbləği: <span style="color: var(--text-main)">${fmtManat(par30Amount)}</span>
           </div>
 
           <div style="font-size: 11px; margin-top: 2px; color: var(--text-muted); font-weight: 700;">
-            Çıxma məbləği: <span style="color: var(--text-main)">${fmtMoney(cureAmount)}</span>
+            Çıxma məbləği: <span style="color: var(--text-main)">${fmtManat(cureAmount)}</span>
           </div>
         </div>
 
         <div class="kpi-box">
           <div class="kpi-label">Yığım</div>
-          <div class="kpi-val">${fmtMoney(yigimVal)}</div>
+          <div class="kpi-val">${fmtManat(yigimVal)}</div>
         </div>
 
         <div class="kpi-box">
           <div class="kpi-label">Satış</div>
-          <div class="kpi-val">${fmtMoney(satisVal)}</div>
+          <div class="kpi-val">${fmtManat(satisVal)}</div>
+
+          <div style="font-size: 11px; margin-top: 6px; color: var(--text-muted); font-weight: 700;">
+            Hissəli ödəniş: <span style="color: var(--text-main)">${fmtManat(installmentAmount)}</span>
+          </div>
         </div>
 
         <div class="kpi-box">
@@ -406,17 +410,17 @@
       // Gauge
       const total = toNum(d.TotalTarget);
       const actual = toNum(d.TotalActual);
-      const percent = total > 0 ? Math.min((actual / total) * 100, 100).toFixed(1) : 0;
+      const percent = total > 0 ? Math.min((actual / total) * 100, 100).toFixed(1) : "0.0";
 
       document.getElementById("gaugeLabel").innerText = percent + "%";
-      document.getElementById("totalTargetText").innerText = fmtMoney(total);
+      document.getElementById("totalTargetText").innerText = fmtManat(total);
 
       if (charts.gauge) charts.gauge.destroy();
       charts.gauge = new Chart(document.getElementById("targetGauge"), {
         type: 'doughnut',
         data: {
           datasets: [{
-            data: [percent, 100 - percent],
+            data: [Number(percent), 100 - Number(percent)],
             backgroundColor: ['#2563eb', '#e2e8f0'],
             borderWidth: 0,
             circumference: 180,
@@ -479,13 +483,13 @@
           <div style="font-weight: 800; font-size: 14px; margin-bottom: 8px; color: var(--primary-blue);">
             ${e.n || "Mütəxəssis"}
           </div>
-          <div style="font-size: 12px;">Satış: <b>${fmtMoney(e.s)}</b></div>
+          <div style="font-size: 12px;">Satış: <b>${fmtManat(e.s)}</b></div>
           <div class="progress-container">
             <div class="progress-fill" style="width:${Math.min(e.t, 100)}%; background:#2563eb"></div>
           </div>
           <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:700;">
             <span>İCRA: ${e.t}%</span>
-            <span>HƏDƏF: ${fmtMoney(e.h)}</span>
+            <span>HƏDƏF: ${fmtManat(e.h)}</span>
           </div>
         </div>
       `).join("");
@@ -501,7 +505,7 @@
       document.getElementById("companyTable").innerHTML = cos.map(c => `
         <tr>
           <td><b>${c[0]}</b></td>
-          <td>${fmtMoney(toNum(c[1]))}</td>
+          <td>${fmtManat(toNum(c[1]))}</td>
           <td style="color:${toNum(c[2]) > 5 ? 'var(--danger)' : 'var(--success)'}">${c[2] || "0%"}</td>
         </tr>
       `).join("");
